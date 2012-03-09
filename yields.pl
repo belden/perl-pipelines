@@ -6,6 +6,7 @@ use warnings;
 use Yielding;
 
 my $stage = 0;
+
 print join "\n",
 	map { "$stage: $_" }
 	grep { $_ % 2 }
@@ -30,6 +31,7 @@ $stage = 0;
 print join "\n", Yielding->(
 	Y::map { "Yielding-> $stage: $_" }
 	Y::grep { $_ % 2 }
+	Y::apply { $_ += 200; 'a' }
 	Y::map { $_ + 100 }
 	Y::map { $stage++; $_ }
 	1..5,

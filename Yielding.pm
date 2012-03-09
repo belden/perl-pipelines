@@ -4,7 +4,7 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
-our @EXPORT = qw(Yielding yielding ymap ygrep);
+our @EXPORT = qw(Yielding yielding ymap ygrep yapply);
 
 our $mode = '';
 sub Yielding {
@@ -28,7 +28,8 @@ sub Yielding {
 				if ($mode eq 'grep' && scalar(@got) == 0) {
 					next ARG;
 				}
-				($arg) = @got;
+
+				($arg) = @got if $mode ne 'apply';
 			}
 			push @out, $arg;
 		}
@@ -61,6 +62,15 @@ sub ::ygrep(&@);
 *ygrep = \&Y::grep;
 *::ygrep = \&Y::grep;
 
+sub Y::apply(&@) {
+	my $code = shift;
+	return __PACKAGE__->new(apply => $code), @_;
+}
+sub yapply(&@);
+sub ::yapply(&@);
+*yapply = \&Y::apply;
+*::yapply = \&Y::apply;
+
 sub new {
 	my ($class, $mode, $code) = @_;
 	return bless +{
@@ -71,7 +81,12 @@ sub new {
 		map => sub {
 			$Yielding::mode = $mode;
 			return map { $code->($_) } @_;
-		}
+		},
+		apply => sub {
+			$Yielding::mode = $mode;
+			$code->() foreach @_;
+			return @_;
+		},
 	}->{$mode}, $class;
 }
 
@@ -90,9 +105,9 @@ Yielding - add yielding to your perl
 	use Yielding;
 
 	my @output = yielding {
-		ymap  { ... }
-		ygrep { ... }
-		ymap  { ... }
+		ymap    { ... }
+		ygrep   { ... }
+		yapply  { ... }
 	} (1..10);
 
 =head1 DESCRIPTION
@@ -220,6 +235,13 @@ ygrep BLOCK
 Make a yieldable C<grep> call for BLOCK. BLOCK will be called for each item of input. The item is
 available in $_. Like Perl's C<grep>, returning a true value will allow this item of input to
 continue through the execution pipeline; returning a false value will filter this item out.
+
+=item *
+
+yapply BLOCK
+
+Make a yieldable C<apply> call for BLOCK. The return value of BLOCK is ignored; mutations to $_
+become the next piece of input for the execution pipeline.
 
 =item *
 
