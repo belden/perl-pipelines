@@ -4,7 +4,7 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
-our @EXPORT = qw(Yielding);
+our @EXPORT = qw(Yielding yielding);
 
 our $mode = '';
 sub Yielding {
@@ -35,6 +35,11 @@ sub Yielding {
 
 		return @out;
 	};
+}
+
+sub yielding (&) {
+	my $code = shift;
+	return Yielding->($code->());
 }
 
 sub Y::map(&@) {
