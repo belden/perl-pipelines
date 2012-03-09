@@ -18,10 +18,11 @@ print "\n\n";
 
 $stage = 0;
 print join "\n", Yielding->(
-	ymap { "$stage: $_" },
-	ygrep { $_ % 2 },
-	ymap { $_ + 100 },
-	ymap { $stage++; $_ },
-	1..10
+	Y::map { "$stage: $_" }
+	Y::grep { $_ % 2 }
+	Y::map { $_ + 100 }
+	Y::map { $stage++; $_ }
+	1..5,
+	sub { 6..10 },
 );
 print "\n";

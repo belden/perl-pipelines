@@ -4,19 +4,24 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
-our @EXPORT = qw(Yielding ymap ygrep);
+our @EXPORT = qw(Yielding);
 
 our $mode = '';
 sub Yielding {
 	return sub {
 
-		my @stages = grep { ref($_) && $_->isa(__PACKAGE__) } reverse(@_);
+		my @stages = grep { ref($_) && UNIVERSAL::isa($_, __PACKAGE__) } reverse(@_);
 		my %stages = map { ("$_" => 1) } @stages;
 		my @args = grep { ! exists $stages{$_} } @_;
 
 		my @out;
 	ARG:
-		foreach my $arg (@args) {
+		while (my $arg = shift @args) {
+			if (ref($arg) eq 'CODE') {
+				unshift @args, $arg->();
+				next ARG;
+			}
+
 			foreach my $stage (@stages) {
 				local $mode;
 				my (@got) = $stage->($arg);
@@ -32,14 +37,14 @@ sub Yielding {
 	};
 }
 
-sub ymap(&) {
+sub Y::map(&@) {
 	my $code = shift;
-	return __PACKAGE__->new(map => $code);
+	return __PACKAGE__->new(map => $code), @_;
 }
 
-sub ygrep(&) {
+sub Y::grep(&@) {
 	my $code = shift;
-	return __PACKAGE__->new(grep => $code);
+	return __PACKAGE__->new(grep => $code), @_;
 }
 
 sub new {
