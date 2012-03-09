@@ -13,15 +13,15 @@ print join "\n",
 	map { $_ + 100 }
 	map { $stage++; $_ }
 	1..10;
-print "\n";
+print "\n\n";
 
 
 $stage = 0;
 print join "\n", Yielding->(
-	sub { map { "$stage: $_" } @_ },
-	sub { grep { $_ % 2 } @_ },
-	sub { map { $_ + 100 } @_ },
-	sub { map { $stage++; $_ } @_ },
+	ymap { "$stage: $_" },
+	ygrep { $_ % 2 },
+	ymap { $_ + 100 },
+	ymap { $stage++; $_ },
 	1..10
 );
 print "\n";
