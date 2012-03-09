@@ -37,3 +37,12 @@ print join "\n", yielding {
 	sub { 6..10 },
 };
 print "\n\n";
+
+$stage = 0;
+print join "\n", yielding {
+	ymap { "yielding again { $stage: $_" }
+	ygrep { $_ % 2 }
+	ymap { $_ + 100 }
+	ymap { $stage++; $_ }
+} (1..5, sub { 6..10});
+print "\n\n";

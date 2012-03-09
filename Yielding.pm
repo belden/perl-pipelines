@@ -4,7 +4,7 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
-our @EXPORT = qw(Yielding yielding);
+our @EXPORT = qw(Yielding yielding ymap ygrep);
 
 our $mode = '';
 sub Yielding {
@@ -37,20 +37,25 @@ sub Yielding {
 	};
 }
 
-sub yielding (&) {
+sub yielding (&@) {
 	my $code = shift;
-	return Yielding->($code->());
+	return Yielding->($code->(), @_);
 }
 
 sub Y::map(&@) {
 	my $code = shift;
 	return __PACKAGE__->new(map => $code), @_;
 }
+sub ymap(&@);
+*ymap = \&Y::map;
 
+
+sub ygrep(&@);
 sub Y::grep(&@) {
 	my $code = shift;
 	return __PACKAGE__->new(grep => $code), @_;
 }
+*ygrep = \&Y::grep;
 
 sub new {
 	my ($class, $mode, $code) = @_;
