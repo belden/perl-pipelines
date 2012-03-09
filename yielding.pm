@@ -1,4 +1,4 @@
-package Yielding;
+package yielding;
 use base qw(Exporter);
 
 use strict;
@@ -75,15 +75,15 @@ sub new {
 	my ($class, $mode, $code) = @_;
 	return bless +{
 		grep => sub {
-			$Yielding::mode = $mode;
+			$yielding::mode = $mode;
 			return grep { $code->($_) } @_;
 		},
 		map => sub {
-			$Yielding::mode = $mode;
+			$yielding::mode = $mode;
 			return map { $code->($_) } @_;
 		},
 		apply => sub {
-			$Yielding::mode = $mode;
+			$yielding::mode = $mode;
 			$code->() foreach @_;
 			return @_;
 		},
@@ -98,11 +98,11 @@ __END__
 
 =head1 NAME
 
-Yielding - add yielding to your perl
+yielding - add yielding to your perl
 
 =head1 SYNOPSIS
 
-	use Yielding;
+	use yielding;
 
 	my @output = yielding {
 		ymap    { ... }
@@ -113,7 +113,7 @@ Yielding - add yielding to your perl
 =head1 DESCRIPTION
 
 If your language doesn't implement it, fake it. This module allows you to turn Perl's normal
-batched data transformation into a yieldable execution pipeline. All code which C<use Yielding>
+batched data transformation into a yieldable execution pipeline. All code which C<use yielding>
 get a C<yielding> function, and associated yieldable C<map> and C<grep> functions.
 
 Consider this code:

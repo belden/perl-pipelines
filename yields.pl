@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Yielding;
+use yielding;
 
 my $stage = 0;
 
