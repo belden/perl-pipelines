@@ -4,9 +4,10 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
+our $VERSION = 0.01;
 our @EXPORT = qw(Yielding yielding ymap ygrep yapply);
 
-our $mode = '';
+our $mode;
 sub Yielding {
 	return sub {
 
@@ -23,7 +24,7 @@ sub Yielding {
 			}
 
 			foreach my $stage (@stages) {
-				local $mode;
+				local $mode = '';
 				my (@got) = $stage->($arg);
 				if ($mode eq 'grep' && scalar(@got) == 0) {
 					next ARG;
