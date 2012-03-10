@@ -4,12 +4,12 @@ use strict;
 use warnings;
 
 use Test;
-BEGIN { plan tests => 3 }
+BEGIN { plan tests => 4 }
 
 use lib '../lib';
 use yielding;
 
-sub hok {
+sub heredoc_ok {
 	my ($got, $heredoc) = @_;
 	chomp $heredoc;
 	local $Test::TestLevel = $Test::TestLevel + 1;
@@ -26,7 +26,7 @@ my $got = join "\n", yielding {
 	('apple', '2 bananas', '4 cherimoya', '8 durian')
 };
 
-hok( $got, <<EXPECTED );
+heredoc_ok( $got, <<EXPECTED );
 2: 2 bAnAnAs
 3: 4 chErImOyA
 4: 8 dUrIAn
@@ -37,7 +37,8 @@ EXPECTED
 my @block_args;
 my @list_args;
 my $pipeline = sub {
-	yielding {
+	$stage = 0;
+	return join "\n", yielding {
 		ymap  { "$stage: $_" }
 		ygrep { $_ % 2 }
 		yapply  { $_ += 100; 'a' }
@@ -47,11 +48,9 @@ my $pipeline = sub {
 };
 
 # first, args inside the block
-$stage = 0;
 @block_args = (1..10);
 @list_args = ();
-$got = join "\n", $pipeline->();
-hok( $got, <<EXPECTED );
+heredoc_ok( $pipeline, <<EXPECTED );
 1: 101
 3: 103
 5: 105
@@ -61,11 +60,9 @@ EXPECTED
 
 # now, args inside and outside the block; notice args inside the block
 # are processed before args outside the block.
-$stage = 0;
 @block_args = (1..5);
 @list_args = (6..10);
-$got = join "\n", $pipeline->();
-hok( $got, <<EXPECTED );
+heredoc_ok( $pipeline, <<EXPECTED );
 1: 101
 3: 103
 5: 105
@@ -74,7 +71,6 @@ hok( $got, <<EXPECTED );
 EXPECTED
 
 # args which are coderefs are understood to be generators of new args
-$stage = 0;
 @block_args = (
 	sub { 1..3 },
 	sub { 4..5 },
@@ -83,8 +79,7 @@ $stage = 0;
 	sub { 6..8 },
 	sub { 9..10 },
 );
-$got = join "\n", $pipeline->();
-hok( $got, <<EXPECTED );
+heredoc_ok( $pipeline, <<EXPECTED );
 1: 101
 3: 103
 5: 105
