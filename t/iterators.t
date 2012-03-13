@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Test;
-BEGIN { plan tests => 4 }
+BEGIN { plan tests => 3 }
 
 use lib '../lib';
 use yielding;
