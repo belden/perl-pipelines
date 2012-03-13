@@ -4,8 +4,15 @@ use base qw(Exporter);
 use strict;
 use warnings;
 
-our $VERSION = 0.01;
-our @EXPORT = qw(Yielding yielding ymap ygrep yapply);
+our $VERSION = 0.02;
+our @EXPORT = qw(
+  Yielding
+  yielding
+  yieldable
+  ymap
+  ygrep
+  yapply
+);
 
 our $mode;
 sub Yielding {
@@ -50,6 +57,22 @@ sub Yielding {
 sub yielding (&@) {
 	my $code = shift;
 	return Yielding->($code->(), @_);
+}
+
+sub yieldable (*@) {
+	my $glob = shift;
+	my $name = *{$glob}{NAME};
+	my $code = *{$glob}{CODE};
+
+	my $mode = $name =~ /^is_/
+			? 'grep'
+			: '';
+	if (!$mode) {
+		die "can't figure out what to do with $code";
+	}
+
+	my $yieldable = sub { $code->($_) };
+	return __PACKAGE__->new($mode => $yieldable), @_;
 }
 
 sub Y::map(&@) {
@@ -288,6 +311,12 @@ Returns a code reference which you can fill with your yieldable calls and immedi
 The return value of C<Yielding>'s return value is the output of your execution pipeline. In the
 example above, @output would be filled with whatever C<send_data_across_network()>'s return value
 is.
+
+=item *
+
+yieldable GLOB
+
+Turn the code at GLOB into a yieldable function.
 
 =back
 
