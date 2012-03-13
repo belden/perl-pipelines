@@ -18,6 +18,14 @@ sub Yielding {
 		my @out;
 	ARG:
 		while (my $arg = shift @args) {
+			if (ref($arg) && UNIVERSAL::can($arg, 'next')) {
+				my $next = $arg->next;
+				if (defined $next) {
+					unshift @args, $next, $arg;
+				}
+				next ARG;
+			}
+
 			if (ref($arg) eq 'CODE') {
 				unshift @args, $arg->();
 				next ARG;
@@ -30,7 +38,7 @@ sub Yielding {
 					next ARG;
 				}
 
-				($arg) = @got if $mode ne 'apply';
+				($arg) = @got if $mode eq 'map';
 			}
 			push @out, $arg;
 		}
